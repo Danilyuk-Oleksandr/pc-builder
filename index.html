@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC Builder</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <div class="logo">PC Builder</div>
+        <nav class="navbar">
+            <a href="#hero">Home</a>
+            <a href="#builder">Builder</a>
+            <a href="#footer">About</a>
+        </nav>
+    </header>
+
+    <main>
+        <!-- HERO SECTION -->
+        <section id="hero" class="hero-section">
+            <h1 class="hero-title">Build Your Dream PC</h1>
+            <p class="hero-description">
+                Choose the best components, check compatibility, and estimate gaming performance — all in one place.
+            </p>
+            <a href="#builder" class="hero-button">Start Building</a>
+        </section>
+
+        <!-- BUILDER SECTION -->
+        <section id="builder" class="builder-section">
+            <h2 class="section-title">Choose Your Components</h2>
+            <div class="components-grid">
+
+                <div class="component-card cpu-card">
+                    <h3>CPU</h3>
+                    <p>Select a processor for your build.</p>
+                    <button class="select-btn">Select</button>
+                </div>
+
+                <div class="component-card gpu-card">
+                    <h3>GPU</h3>
+                    <p>Choose a graphics card for maximum performance.</p>
+                    <button class="select-btn">Select</button>
+                </div>
+
+                <div class="component-card ram-card">
+                    <h3>RAM</h3>
+                    <p>Pick the right amount of memory.</p>
+                    <button class="select-btn">Select</button>
+                </div>
+
+                <div class="component-card ssd-card">
+                    <h3>SSD</h3>
+                    <p>Fast storage for your system and games.</p>
+                    <button class="select-btn">Select</button>
+                </div>
+
+                <div class="component-card psu-card">
+                    <h3>PSU</h3>
+                    <p>Reliable power supply for your build.</p>
+                    <button class="select-btn">Select</button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- RESULTS SECTION -->
+        <section id="results" class="results-section">
+            <div class="result-card total-price-card">
+                <h3>Total Price</h3>
+                <p class="result-value">0$</p>
+            </div>
+
+            <div class="result-card compatibility-card">
+                <h3>Compatibility</h3>
+                <p class="result-value">Waiting...</p>
+            </div>
+
+            <div class="result-card performance-card">
+                <h3>Gaming Performance</h3>
+                <p class="result-value">Waiting...</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer id="footer">
+        <p>PC Builder &copy; 2026</p>
+    </footer>
+
+    <script src="data/components.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
