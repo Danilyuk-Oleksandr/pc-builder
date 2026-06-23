@@ -12,6 +12,7 @@ const modal = document.getElementById('modal');
 const modalTitle = document.getElementById('modal-title');
 const modalComponents = document.getElementById('modal-components');
 const closeModalBtn = document.getElementById('close-modal');
+const resetButton = document.getElementById('reset-button');
 
 const cpuButton = document.querySelector('.cpu-card .select-btn');
 const gpuButton = document.querySelector('.gpu-card .select-btn');
@@ -32,9 +33,9 @@ function openModal(type, dataArray) {
         // Build display name and detail text based on component type
         let detailText = '';
         if (type === 'cpu') {
-            detailText = `Socket: ${item.socket} | Power: ${item.power}W`;
+            detailText = `Socket: ${item.socket} | Power: ${item.power}W | Gaming: ${item.gamingScore}`;
         } else if (type === 'gpu') {
-            detailText = `FPS: ${item.fps} | Power: ${item.power}W`;
+            detailText = `FPS: ${item.fps} | Power: ${item.power}W | Gaming: ${item.gamingScore}`;
         } else if (type === 'ram') {
             detailText = `Size: ${item.size}`;
         } else if (type === 'ssd') {
@@ -86,15 +87,36 @@ function selectComponent(type, component) {
     currentBuild[type] = component;
 
     // Update the selected-component display in the card
-    const selectedEl = document.getElementById(`selected-${type}`);
-    selectedEl.textContent = `${component.name} — ${component.price}$`;
-    selectedEl.classList.add('active');
+    updateSelectedDisplay(type, component);
+
+    // Update build summary
+    updateBuildSummary();
 
     // Update total price
     updateTotalPrice();
 
+    // Check compatibility
+    checkCompatibility();
+
+    // Update performance
+    updatePerformance();
+
     // Close modal
     closeModal();
+}
+
+function updateSelectedDisplay(type, component) {
+    const selectedEl = document.getElementById(`selected-${type}`);
+    if (component) {
+        selectedEl.textContent = `${component.name} — ${component.price}$`;
+        selectedEl.classList.add('active');
+    }
+}
+
+function clearSelectedDisplay(type) {
+    const selectedEl = document.getElementById(`selected-${type}`);
+    selectedEl.textContent = 'Not selected';
+    selectedEl.classList.remove('active');
 }
 
 // ===== TOTAL PRICE =====
@@ -111,6 +133,124 @@ function updateTotalPrice() {
     const priceElement = document.querySelector('.price-value');
     priceElement.textContent = `${total}$`;
 }
+
+// ===== COMPATIBILITY CHECK =====
+
+function checkCompatibility() {
+    const compatEl = document.getElementById('compatibility-status');
+
+    // Check if all components are selected
+    const allSelected = currentBuild.cpu && currentBuild.gpu &&
+                        currentBuild.ram && currentBuild.ssd && currentBuild.psu;
+
+    if (!allSelected) {
+        compatEl.textContent = 'Incomplete build';
+        compatEl.className = 'result-value compatibility-value incomplete';
+        return;
+    }
+
+    // Calculate total power consumption
+    const totalPower = currentBuild.cpu.power + currentBuild.gpu.power;
+    const psuWattage = currentBuild.psu.wattage;
+
+    if (totalPower > psuWattage) {
+        compatEl.textContent = `Power supply is too weak (${totalPower}W > ${psuWattage}W)`;
+        compatEl.className = 'result-value compatibility-value incompatible';
+    } else {
+        compatEl.textContent = `Compatible (${totalPower}W / ${psuWattage}W)`;
+        compatEl.className = 'result-value compatibility-value compatible';
+    }
+}
+
+// ===== PERFORMANCE ESTIMATE =====
+
+function updatePerformance() {
+    const perfEl = document.getElementById('performance-status');
+
+    // If CPU or GPU not selected yet
+    if (!currentBuild.cpu || !currentBuild.gpu) {
+        perfEl.textContent = 'Waiting...';
+        perfEl.className = 'result-value performance-value waiting';
+        return;
+    }
+
+    // Calculate total gaming score
+    const totalScore = currentBuild.cpu.gamingScore + currentBuild.gpu.gamingScore;
+
+    if (totalScore < 120) {
+        perfEl.textContent = 'Low (1080p Low)';
+        perfEl.className = 'result-value performance-value low';
+    } else if (totalScore <= 180) {
+        perfEl.textContent = 'Medium (1080p High)';
+        perfEl.className = 'result-value performance-value medium';
+    } else if (totalScore <= 250) {
+        perfEl.textContent = 'High (1440p Ultra)';
+        perfEl.className = 'result-value performance-value high';
+    } else {
+        perfEl.textContent = 'Ultra (4K Gaming)';
+        perfEl.className = 'result-value performance-value ultra';
+    }
+}
+
+// ===== BUILD SUMMARY =====
+
+function updateBuildSummary() {
+    const components = [
+        { id: 'summary-cpu', key: 'cpu', label: 'CPU' },
+        { id: 'summary-gpu', key: 'gpu', label: 'GPU' },
+        { id: 'summary-ram', key: 'ram', label: 'RAM' },
+        { id: 'summary-ssd', key: 'ssd', label: 'SSD' },
+        { id: 'summary-psu', key: 'psu', label: 'PSU' }
+    ];
+
+    components.forEach(comp => {
+        const el = document.getElementById(comp.id);
+        if (currentBuild[comp.key]) {
+            el.textContent = currentBuild[comp.key].name;
+            el.classList.add('selected');
+        } else {
+            el.textContent = '—';
+            el.classList.remove('selected');
+        }
+    });
+}
+
+// ===== RESET BUILD =====
+
+function resetBuild() {
+    // Reset all components to null
+    currentBuild.cpu = null;
+    currentBuild.gpu = null;
+    currentBuild.ram = null;
+    currentBuild.ssd = null;
+    currentBuild.psu = null;
+
+    // Clear selected displays
+    ['cpu', 'gpu', 'ram', 'ssd', 'psu'].forEach(type => {
+        clearSelectedDisplay(type);
+    });
+
+    // Reset total price
+    updateTotalPrice();
+
+    // Reset compatibility
+    const compatEl = document.getElementById('compatibility-status');
+    compatEl.textContent = 'Waiting...';
+    compatEl.className = 'result-value compatibility-value waiting';
+
+    // Reset performance
+    const perfEl = document.getElementById('performance-status');
+    perfEl.textContent = 'Waiting...';
+    perfEl.className = 'result-value performance-value waiting';
+
+    // Reset build summary
+    updateBuildSummary();
+
+    // Close modal if open
+    closeModal();
+}
+
+resetButton.addEventListener('click', resetBuild);
 
 // ===== EVENT LISTENERS FOR SELECT BUTTONS =====
 

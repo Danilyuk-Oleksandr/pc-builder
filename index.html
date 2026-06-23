@@ -76,16 +76,27 @@
             <div class="result-card total-price-card">
                 <h3>Total Price</h3>
                 <p class="result-value price-value">0$</p>
+                <div class="build-summary" id="build-summary">
+                    <div class="summary-row">CPU: <span id="summary-cpu">—</span></div>
+                    <div class="summary-row">GPU: <span id="summary-gpu">—</span></div>
+                    <div class="summary-row">RAM: <span id="summary-ram">—</span></div>
+                    <div class="summary-row">SSD: <span id="summary-ssd">—</span></div>
+                    <div class="summary-row">PSU: <span id="summary-psu">—</span></div>
+                </div>
             </div>
 
             <div class="result-card compatibility-card">
                 <h3>Compatibility</h3>
-                <p class="result-value compatibility-value">Waiting...</p>
+                <p class="result-value compatibility-value" id="compatibility-status">Waiting...</p>
             </div>
 
             <div class="result-card performance-card">
                 <h3>Gaming Performance</h3>
-                <p class="result-value performance-value">Waiting...</p>
+                <p class="result-value performance-value" id="performance-status">Waiting...</p>
+            </div>
+
+            <div class="result-card reset-card">
+                <button class="reset-button" id="reset-button">Reset Build</button>
             </div>
         </section>
     </main>
@@ -106,5 +117,5 @@
 
     <script src="data/components.js"></script>
     <script src="js/app.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0fa956d7b9d9f3e',t:'MTc4MjEyNDI5MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
