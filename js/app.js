@@ -197,6 +197,7 @@ function selectComponent(type, component) {
     updateTotalPrice();
     checkCompatibility();
     updatePerformance();
+    if (typeof updateFPSCalculator === 'function') updateFPSCalculator();
     closeModal();
 }
 
@@ -297,7 +298,7 @@ function updateBuildSummary() {
     components.forEach(comp => {
         const el = document.getElementById(comp.id);
         if (currentBuild[comp.key]) {
-            el.textContent = currentBuild[comp.key].name;
+            el.textContent = `${currentBuild[comp.key].name} ($${currentBuild[comp.key].price})`;
             el.classList.add('selected');
         } else {
             el.textContent = '—';
@@ -330,6 +331,15 @@ function resetBuild() {
     perfEl.textContent = 'Waiting...';
     perfEl.className = 'result-value performance-value waiting';
 
+    // Reset FPS calculator
+    const fpsValueEl = document.getElementById('fps-value');
+    if (fpsValueEl) {
+        fpsValueEl.textContent = '—';
+        fpsValueEl.className = 'fps-value';
+    }
+    const gameSelectEl = document.getElementById('game-select');
+    if (gameSelectEl) gameSelectEl.value = 'none';
+
     showToast('Build reset successfully', 'success');
 }
 
@@ -339,7 +349,55 @@ resetButton.addEventListener('click', resetBuild);
 
 function saveBuild() {
     localStorage.setItem('pcBuild', JSON.stringify(currentBuild));
-    showToast('Build successfully saved!', 'success');
+
+    // Also save to history
+    const allSelected = currentBuild.cpu && currentBuild.gpu &&
+                        currentBuild.ram && currentBuild.ssd && currentBuild.psu;
+
+    if (allSelected) {
+        let total = currentBuild.cpu.price + currentBuild.gpu.price +
+                    currentBuild.ram.price + currentBuild.ssd.price + currentBuild.psu.price;
+
+        const buildEntry = {
+            id: Date.now(),
+            cpu: currentBuild.cpu.name,
+            gpu: currentBuild.gpu.name,
+            ram: currentBuild.ram.name,
+            ssd: currentBuild.ssd.name,
+            psu: currentBuild.psu.name,
+            totalPrice: total,
+            date: new Date().toLocaleDateString('en-GB', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            })
+        };
+
+        let buildHistory = [];
+        const savedHistory = localStorage.getItem('pcBuildHistory');
+        if (savedHistory) {
+            try {
+                buildHistory = JSON.parse(savedHistory);
+            } catch (e) {
+                buildHistory = [];
+            }
+        }
+
+        buildHistory.unshift(buildEntry);
+        localStorage.setItem('pcBuildHistory', JSON.stringify(buildHistory));
+
+        // Render history if available
+        if (typeof renderBuildHistory === 'function') {
+            window.buildHistory = buildHistory;
+            renderBuildHistory();
+        }
+
+        showToast('Build saved & added to history!', 'success');
+    } else {
+        showToast('Build successfully saved!', 'success');
+    }
 }
 
 function loadBuild() {

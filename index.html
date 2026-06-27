@@ -14,7 +14,7 @@
         <nav class="navbar">
             <a href="#hero">Home</a>
             <a href="#builder">Builder</a>
-            <a href="#footer">About</a>
+            <a href="#history">History</a>
         </nav>
         <button class="theme-toggle" id="theme-toggle" title="Toggle theme">🌙</button>
     </header>
@@ -100,8 +100,34 @@
                 <p class="result-value performance-value" id="performance-status">Waiting...</p>
             </div>
 
+            <!-- FPS Calculator Card -->
+            <div class="result-card fps-card">
+                <h3>FPS Calculator</h3>
+                <div class="fps-select-container">
+                    <label for="game-select">Select a game:</label>
+                    <select id="game-select" class="game-select">
+                        <option value="none">— Choose a game —</option>
+                    </select>
+                </div>
+                <div class="fps-display">
+                    <span class="fps-label">Estimated FPS</span>
+                    <span class="fps-value" id="fps-value">—</span>
+                </div>
+            </div>
+
             <div class="result-card reset-card">
                 <button class="reset-button" id="reset-button">Reset Build</button>
+            </div>
+        </section>
+
+        <!-- HISTORY SECTION -->
+        <section id="history" class="history-section">
+            <h2 class="section-title">Build History</h2>
+            <div class="history-grid" id="history-grid">
+                <p class="history-empty">No saved builds yet. Start building and save your first build!</p>
+            </div>
+            <div class="history-actions">
+                <button class="clear-history-button" id="clear-history-button">🗑️ Clear History</button>
             </div>
         </section>
     </main>
@@ -134,5 +160,6 @@
 
     <script src="data/components.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/history.js"></script>
 </body>
 </html>
