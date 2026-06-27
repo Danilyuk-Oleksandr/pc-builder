@@ -7,6 +7,15 @@ const currentBuild = {
     psu: null
 };
 
+// ===== SAVED BUILD STATE (for comparison) =====
+let savedBuild = {
+    cpu: null,
+    gpu: null,
+    ram: null,
+    ssd: null,
+    psu: null
+};
+
 // ===== CURRENT MODAL STATE =====
 let currentModalType = '';
 let currentModalData = [];
@@ -34,6 +43,11 @@ const ramButton = document.querySelector('.ram-card .select-btn');
 const ssdButton = document.querySelector('.ssd-card .select-btn');
 const psuButton = document.querySelector('.psu-card .select-btn');
 
+// Comparison elements
+const compareButton = document.getElementById('compare-button');
+const swapButton = document.getElementById('swap-button');
+const comparisonResult = document.getElementById('comparison-result');
+
 // ===== BRAND FILTER MAP =====
 const brandMap = {
     cpu: ['AMD', 'Intel'],
@@ -43,7 +57,9 @@ const brandMap = {
     psu: ['Corsair', 'Seasonic']
 };
 
-// ===== MODAL FUNCTIONS =====
+// ========================================
+// MODAL FUNCTIONS
+// ========================================
 
 function openModal(type, dataArray) {
     currentModalType = type;
@@ -100,12 +116,12 @@ function closeModal() {
 closeModalBtn.addEventListener('click', closeModal);
 
 modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-        closeModal();
-    }
+    if (e.target === modal) closeModal();
 });
 
-// ===== RENDER COMPONENTS (search + sort + filter) =====
+// ========================================
+// RENDER COMPONENTS (search + sort + filter)
+// ========================================
 
 function renderComponents() {
     modalComponents.innerHTML = '';
@@ -129,7 +145,7 @@ function renderComponents() {
     }
 
     if (filtered.length === 0) {
-        modalComponents.innerHTML = '<p style="text-align:center;color:#6a6a8e;padding:2rem;">No components found.</p>';
+        modalComponents.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:2rem;">No components found.</p>';
         return;
     }
 
@@ -187,7 +203,9 @@ sortSelect.addEventListener('change', (e) => {
     renderComponents();
 });
 
-// ===== COMPONENT SELECTION =====
+// ========================================
+// COMPONENT SELECTION
+// ========================================
 
 function selectComponent(type, component) {
     currentBuild[type] = component;
@@ -195,9 +213,12 @@ function selectComponent(type, component) {
     updateSelectedDisplay(type, component);
     updateBuildSummary();
     updateTotalPrice();
+    updateProgressBar();
     checkCompatibility();
     updatePerformance();
+    updateGamingBadge();
     if (typeof updateFPSCalculator === 'function') updateFPSCalculator();
+    updateComparisonCurrent();
     closeModal();
 }
 
@@ -215,22 +236,106 @@ function clearSelectedDisplay(type) {
     selectedEl.classList.remove('active');
 }
 
-// ===== TOTAL PRICE =====
+// ========================================
+// TOTAL PRICE
+// ========================================
+
+function getTotalPrice(build) {
+    let total = 0;
+    if (build.cpu) total += build.cpu.price;
+    if (build.gpu) total += build.gpu.price;
+    if (build.ram) total += build.ram.price;
+    if (build.ssd) total += build.ssd.price;
+    if (build.psu) total += build.psu.price;
+    return total;
+}
 
 function updateTotalPrice() {
-    let total = 0;
-
-    if (currentBuild.cpu) total += currentBuild.cpu.price;
-    if (currentBuild.gpu) total += currentBuild.gpu.price;
-    if (currentBuild.ram) total += currentBuild.ram.price;
-    if (currentBuild.ssd) total += currentBuild.ssd.price;
-    if (currentBuild.psu) total += currentBuild.psu.price;
-
+    const total = getTotalPrice(currentBuild);
     const priceElement = document.querySelector('.price-value');
     priceElement.textContent = `${total}$`;
 }
 
-// ===== COMPATIBILITY CHECK =====
+// ========================================
+// PROGRESS BAR
+// ========================================
+
+function updateProgressBar() {
+    const total = getTotalPrice(currentBuild);
+    const bar = document.getElementById('progress-bar');
+    const label = document.getElementById('progress-label');
+
+    let percentage = 0;
+    let tier = '';
+    let tierClass = '';
+
+    if (total === 0) {
+        percentage = 0;
+        tier = 'Budget';
+        tierClass = 'budget';
+    } else if (total <= 700) {
+        percentage = (total / 2500) * 100;
+        tier = 'Budget';
+        tierClass = 'budget';
+    } else if (total <= 1200) {
+        percentage = (total / 2500) * 100;
+        tier = 'Mid-range';
+        tierClass = 'mid-range';
+    } else if (total <= 2000) {
+        percentage = (total / 2500) * 100;
+        tier = 'High-End';
+        tierClass = 'high-end';
+    } else {
+        percentage = Math.min((total / 2500) * 100, 100);
+        tier = 'Extreme';
+        tierClass = 'extreme';
+    }
+
+    bar.style.width = `${percentage}%`;
+    bar.className = `progress-bar ${tierClass}`;
+    label.textContent = tier;
+}
+
+// ========================================
+// GAMING BADGE
+// ========================================
+
+function updateGamingBadge() {
+    const badgeValue = document.querySelector('#gaming-badge .badge-value');
+    const badgeLabel = document.querySelector('#gaming-badge .badge-label');
+
+    if (!currentBuild.cpu || !currentBuild.gpu) {
+        badgeLabel.textContent = 'Badge';
+        badgeValue.textContent = '—';
+        badgeValue.className = 'badge-value';
+        return;
+    }
+
+    const totalScore = currentBuild.cpu.gamingScore + currentBuild.gpu.gamingScore;
+    let badge, badgeClass;
+
+    if (totalScore < 120) {
+        badge = 'Office';
+        badgeClass = 'office';
+    } else if (totalScore <= 180) {
+        badge = 'Gaming';
+        badgeClass = 'gaming';
+    } else if (totalScore <= 250) {
+        badge = 'Creator';
+        badgeClass = 'creator';
+    } else {
+        badge = 'Enthusiast';
+        badgeClass = 'enthusiast';
+    }
+
+    badgeLabel.textContent = 'Badge';
+    badgeValue.textContent = badge;
+    badgeValue.className = `badge-value ${badgeClass}`;
+}
+
+// ========================================
+// COMPATIBILITY CHECK
+// ========================================
 
 function checkCompatibility() {
     const compatEl = document.getElementById('compatibility-status');
@@ -256,7 +361,9 @@ function checkCompatibility() {
     }
 }
 
-// ===== PERFORMANCE ESTIMATE =====
+// ========================================
+// PERFORMANCE ESTIMATE
+// ========================================
 
 function updatePerformance() {
     const perfEl = document.getElementById('performance-status');
@@ -284,7 +391,9 @@ function updatePerformance() {
     }
 }
 
-// ===== BUILD SUMMARY =====
+// ========================================
+// BUILD SUMMARY
+// ========================================
 
 function updateBuildSummary() {
     const components = [
@@ -307,7 +416,184 @@ function updateBuildSummary() {
     });
 }
 
-// ===== RESET BUILD =====
+// ========================================
+// COMPARISON FUNCTIONS
+// ========================================
+
+function updateComparisonCurrent() {
+    const types = ['cpu', 'gpu', 'ram', 'ssd', 'psu'];
+    types.forEach(type => {
+        const el = document.getElementById(`comp-current-${type}`);
+        if (el) {
+            el.textContent = currentBuild[type] ? currentBuild[type].name : '—';
+        }
+    });
+    const priceEl = document.getElementById('comp-current-price');
+    if (priceEl) priceEl.textContent = `${getTotalPrice(currentBuild)}$`;
+}
+
+function updateComparisonSaved() {
+    const types = ['cpu', 'gpu', 'ram', 'ssd', 'psu'];
+    types.forEach(type => {
+        const el = document.getElementById(`comp-saved-${type}`);
+        if (el) {
+            el.textContent = savedBuild[type] ? savedBuild[type].name : '—';
+        }
+    });
+    const priceEl = document.getElementById('comp-saved-price');
+    if (priceEl) priceEl.textContent = `${getTotalPrice(savedBuild)}$`;
+}
+
+function loadSavedBuildForComparison(build) {
+    // Find full component objects from data arrays
+    const arrays = { cpu: cpus, gpu: gpus, ram: rams, ssd: ssds, psu: psus };
+    const types = ['cpu', 'gpu', 'ram', 'ssd', 'psu'];
+    
+    types.forEach(type => {
+        savedBuild[type] = (arrays[type] || []).find(item => item.name === build[type]) || null;
+    });
+
+    updateComparisonSaved();
+    showToast('Build loaded for comparison!', 'success');
+}
+
+// Compare Builds
+function compareBuilds() {
+    const currentPrice = getTotalPrice(currentBuild);
+    const savedPrice = getTotalPrice(savedBuild);
+
+    if (currentPrice === 0 && savedPrice === 0) {
+        showToast('Select builds to compare first', 'error');
+        return;
+    }
+
+    // Price difference
+    const priceDiff = currentPrice - savedPrice;
+    const priceEl = document.getElementById('result-price');
+    if (priceDiff === 0 && currentPrice > 0) {
+        priceEl.textContent = 'Same price';
+        priceEl.className = 'result-value-text neutral';
+    } else if (priceDiff > 0) {
+        priceEl.textContent = `Current is ${priceDiff}$ more expensive`;
+        priceEl.className = 'result-value-text worse';
+    } else if (priceDiff < 0) {
+        priceEl.textContent = `Current is ${Math.abs(priceDiff)}$ cheaper`;
+        priceEl.className = 'result-value-text better';
+    } else {
+        priceEl.textContent = '—';
+        priceEl.className = 'result-value-text neutral';
+    }
+
+    // Gaming performance difference
+    const currentScore = (currentBuild.cpu?.gamingScore || 0) + (currentBuild.gpu?.gamingScore || 0);
+    const savedScore = (savedBuild.cpu?.gamingScore || 0) + (savedBuild.gpu?.gamingScore || 0);
+    const perfEl = document.getElementById('result-performance');
+
+    if (currentScore === 0 && savedScore === 0) {
+        perfEl.textContent = '—';
+        perfEl.className = 'result-value-text neutral';
+    } else if (savedScore === 0) {
+        perfEl.textContent = 'Current build score: ' + currentScore;
+        perfEl.className = 'result-value-text neutral';
+    } else {
+        const percentDiff = Math.round(((currentScore - savedScore) / savedScore) * 100);
+        if (percentDiff > 0) {
+            perfEl.textContent = `Gaming Performance +${percentDiff}%`;
+            perfEl.className = 'result-value-text better';
+        } else if (percentDiff < 0) {
+            perfEl.textContent = `Gaming Performance ${percentDiff}%`;
+            perfEl.className = 'result-value-text worse';
+        } else {
+            perfEl.textContent = 'Same gaming performance';
+            perfEl.className = 'result-value-text neutral';
+        }
+    }
+
+    // Power consumption difference
+    const currentPower = (currentBuild.cpu?.power || 0) + (currentBuild.gpu?.power || 0);
+    const savedPower = (savedBuild.cpu?.power || 0) + (savedBuild.gpu?.power || 0);
+    const powerEl = document.getElementById('result-power');
+
+    if (currentPower === 0 && savedPower === 0) {
+        powerEl.textContent = '—';
+        powerEl.className = 'result-value-text neutral';
+    } else if (savedPower === 0) {
+        powerEl.textContent = `Current power draw: ${currentPower}W`;
+        powerEl.className = 'result-value-text neutral';
+    } else {
+        const powerDiff = currentPower - savedPower;
+        if (powerDiff > 0) {
+            powerEl.textContent = `Current uses +${powerDiff}W more power`;
+            powerEl.className = 'result-value-text worse';
+        } else if (powerDiff < 0) {
+            powerEl.textContent = `Current uses ${Math.abs(powerDiff)}W less power`;
+            powerEl.className = 'result-value-text better';
+        } else {
+            powerEl.textContent = 'Same power consumption';
+            powerEl.className = 'result-value-text neutral';
+        }
+    }
+
+    // Show result
+    comparisonResult.classList.add('visible');
+}
+
+// Swap Builds
+function swapBuilds() {
+    const temp = { ...currentBuild };
+    
+    // Swap currentBuild with savedBuild
+    currentBuild.cpu = savedBuild.cpu;
+    currentBuild.gpu = savedBuild.gpu;
+    currentBuild.ram = savedBuild.ram;
+    currentBuild.ssd = savedBuild.ssd;
+    currentBuild.psu = savedBuild.psu;
+
+    savedBuild.cpu = temp.cpu;
+    savedBuild.gpu = temp.gpu;
+    savedBuild.ram = temp.ram;
+    savedBuild.ssd = temp.ssd;
+    savedBuild.psu = temp.psu;
+
+    // Update all UI
+    ['cpu', 'gpu', 'ram', 'ssd', 'psu'].forEach(type => {
+        updateSelectedDisplay(type, currentBuild[type]);
+    });
+    updateBuildSummary();
+    updateTotalPrice();
+    updateProgressBar();
+    checkCompatibility();
+    updatePerformance();
+    updateGamingBadge();
+    if (typeof updateFPSCalculator === 'function') updateFPSCalculator();
+    updateComparisonCurrent();
+    updateComparisonSaved();
+
+    showToast('Builds swapped!', 'success');
+}
+
+compareButton.addEventListener('click', compareBuilds);
+swapButton.addEventListener('click', swapBuilds);
+
+// Make functions available globally for history.js
+window.updateFPSCalculator = function() {
+    if (typeof gameSelect !== 'undefined') {
+        gameSelect.dispatchEvent(new Event('change'));
+    }
+};
+window.loadSavedBuildForComparison = loadSavedBuildForComparison;
+window.updateComparisonCurrent = updateComparisonCurrent;
+window.updateComparisonSaved = updateComparisonSaved;
+window.updateBuildSummary = updateBuildSummary;
+window.updateTotalPrice = updateTotalPrice;
+window.updateProgressBar = updateProgressBar;
+window.checkCompatibility = checkCompatibility;
+window.updatePerformance = updatePerformance;
+window.updateGamingBadge = updateGamingBadge;
+
+// ========================================
+// RESET BUILD
+// ========================================
 
 function resetBuild() {
     currentBuild.cpu = null;
@@ -321,7 +607,10 @@ function resetBuild() {
     });
 
     updateTotalPrice();
+    updateProgressBar();
     updateBuildSummary();
+    updateGamingBadge();
+    updateComparisonCurrent();
 
     const compatEl = document.getElementById('compatibility-status');
     compatEl.textContent = 'Waiting...';
@@ -331,7 +620,6 @@ function resetBuild() {
     perfEl.textContent = 'Waiting...';
     perfEl.className = 'result-value performance-value waiting';
 
-    // Reset FPS calculator
     const fpsValueEl = document.getElementById('fps-value');
     if (fpsValueEl) {
         fpsValueEl.textContent = '—';
@@ -345,12 +633,13 @@ function resetBuild() {
 
 resetButton.addEventListener('click', resetBuild);
 
-// ===== SAVE / LOAD / CLEAR =====
+// ========================================
+// SAVE / LOAD / CLEAR
+// ========================================
 
 function saveBuild() {
     localStorage.setItem('pcBuild', JSON.stringify(currentBuild));
 
-    // Also save to history
     const allSelected = currentBuild.cpu && currentBuild.gpu &&
                         currentBuild.ram && currentBuild.ssd && currentBuild.psu;
 
@@ -388,7 +677,6 @@ function saveBuild() {
         buildHistory.unshift(buildEntry);
         localStorage.setItem('pcBuildHistory', JSON.stringify(buildHistory));
 
-        // Render history if available
         if (typeof renderBuildHistory === 'function') {
             window.buildHistory = buildHistory;
             renderBuildHistory();
@@ -414,9 +702,12 @@ function loadBuild() {
         });
 
         updateTotalPrice();
+        updateProgressBar();
         updateBuildSummary();
         checkCompatibility();
         updatePerformance();
+        updateGamingBadge();
+        updateComparisonCurrent();
     } catch (e) {
         console.warn('Failed to load saved build:', e);
     }
@@ -431,7 +722,9 @@ function clearBuild() {
 saveButton.addEventListener('click', saveBuild);
 clearButton.addEventListener('click', clearBuild);
 
-// ===== TOAST NOTIFICATION =====
+// ========================================
+// TOAST NOTIFICATION
+// ========================================
 
 function showToast(message, type = 'success') {
     toast.textContent = message;
@@ -442,7 +735,9 @@ function showToast(message, type = 'success') {
     }, 2500);
 }
 
-// ===== THEME TOGGLE =====
+// ========================================
+// THEME TOGGLE
+// ========================================
 
 function loadTheme() {
     const savedTheme = localStorage.getItem('pcTheme');
@@ -461,7 +756,9 @@ function toggleTheme() {
 
 themeToggle.addEventListener('click', toggleTheme);
 
-// ===== EVENT LISTENERS FOR SELECT BUTTONS =====
+// ========================================
+// EVENT LISTENERS FOR SELECT BUTTONS
+// ========================================
 
 cpuButton.addEventListener('click', () => openModal('cpu', cpus));
 gpuButton.addEventListener('click', () => openModal('gpu', gpus));
@@ -469,6 +766,11 @@ ramButton.addEventListener('click', () => openModal('ram', rams));
 ssdButton.addEventListener('click', () => openModal('ssd', ssds));
 psuButton.addEventListener('click', () => openModal('psu', psus));
 
-// ===== INIT =====
+// ========================================
+// INIT
+// ========================================
 loadBuild();
 loadTheme();
+updateProgressBar();
+updateGamingBadge();
+updateComparisonCurrent();

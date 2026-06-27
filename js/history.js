@@ -36,7 +36,6 @@ function calculateFPS(gameIndex) {
     const game = games[parseInt(gameIndex)];
     const totalScore = currentBuild.cpu.gamingScore + currentBuild.gpu.gamingScore;
     
-    // FPS formula: total gaming score * game difficulty coefficient * scaling factor
     const estimatedFPS = Math.round(totalScore * game.difficulty * 1.2);
     
     return estimatedFPS;
@@ -54,7 +53,6 @@ function updateFPSCalculator() {
     
     fpsValue.textContent = `${fps} FPS`;
     
-    // Color based on FPS value
     if (fps < 60) {
         fpsValue.className = 'fps-value low-fps';
     } else if (fps <= 120) {
@@ -64,7 +62,6 @@ function updateFPSCalculator() {
     }
 }
 
-// Game select event listener
 gameSelect.addEventListener('change', updateFPSCalculator);
 
 // ===== BUILD HISTORY FUNCTIONS =====
@@ -113,10 +110,66 @@ function renderBuildHistory() {
                 </div>
             </div>
             <div class="history-card-price">${build.totalPrice}$</div>
+            <div class="history-card-actions">
+                <button class="load-build-btn" data-build-id="${build.id}">📂 Load Build</button>
+            </div>
         `;
         
         historyGrid.appendChild(historyCard);
     });
+    
+    // Attach event listeners to all Load Build buttons
+    document.querySelectorAll('.load-build-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const buildId = parseInt(btn.dataset.buildId);
+            loadBuildFromHistory(buildId);
+        });
+    });
+}
+
+function loadBuildFromHistory(buildId) {
+    const history = window.buildHistory || [];
+    const build = history.find(b => b.id === buildId);
+    
+    if (!build) {
+        showToast('Build not found in history', 'error');
+        return;
+    }
+    
+    // Load the build into the saved build comparison
+    if (typeof loadSavedBuildForComparison === 'function') {
+        loadSavedBuildForComparison(build);
+    }
+    
+    // Also set as current build
+    currentBuild.cpu = findComponent('cpu', build.cpu);
+    currentBuild.gpu = findComponent('gpu', build.gpu);
+    currentBuild.ram = findComponent('ram', build.ram);
+    currentBuild.ssd = findComponent('ssd', build.ssd);
+    currentBuild.psu = findComponent('psu', build.psu);
+    
+    // Update all UI
+    ['cpu', 'gpu', 'ram', 'ssd', 'psu'].forEach(type => {
+        updateSelectedDisplay(type, currentBuild[type]);
+    });
+    
+    updateBuildSummary();
+    updateTotalPrice();
+    checkCompatibility();
+    updatePerformance();
+    if (typeof updateFPSCalculator === 'function') updateFPSCalculator();
+    if (typeof updateComparisonCurrent === 'function') updateComparisonCurrent();
+    if (typeof updateGamingBadge === 'function') updateGamingBadge();
+    
+    showToast(`Build "${build.cpu} + ${build.gpu}" loaded!`, 'success');
+    
+    // Scroll to builder section
+    document.getElementById('builder').scrollIntoView({ behavior: 'smooth' });
+}
+
+function findComponent(type, name) {
+    const arrays = { cpu: cpus, gpu: gpus, ram: rams, ssd: ssds, psu: psus };
+    return (arrays[type] || []).find(item => item.name === name) || null;
 }
 
 function clearBuildHistory() {
@@ -126,10 +179,9 @@ function clearBuildHistory() {
     showToast('Build history cleared', 'error');
 }
 
-// ===== EVENT LISTENERS =====
-
 clearHistoryBtn.addEventListener('click', clearBuildHistory);
 
 // ===== INIT =====
 populateGameSelect();
 loadBuildHistory();
+і

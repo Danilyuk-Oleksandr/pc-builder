@@ -15,6 +15,7 @@
             <a href="#hero">Home</a>
             <a href="#builder">Builder</a>
             <a href="#history">History</a>
+            <a href="#comparison">Compare</a>
         </nav>
         <button class="theme-toggle" id="theme-toggle" title="Toggle theme">🌙</button>
     </header>
@@ -27,6 +28,22 @@
                 Choose the best components, check compatibility, and estimate gaming performance — all in one place.
             </p>
             <a href="#builder" class="hero-button">Start Building</a>
+        </section>
+
+        <!-- STATS SECTION -->
+        <section id="stats" class="stats-section">
+            <div class="stat-item">
+                <div class="stat-number">500+</div>
+                <div class="stat-label">Components</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">1000+</div>
+                <div class="stat-label">Builds Created</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">50+</div>
+                <div class="stat-label">Games Supported</div>
+            </div>
         </section>
 
         <!-- BUILDER SECTION -->
@@ -77,6 +94,12 @@
             <div class="result-card total-price-card">
                 <h3>Total Price</h3>
                 <p class="result-value price-value">0$</p>
+                <!-- Progress Bar -->
+                <div class="progress-container" id="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div class="progress-label" id="progress-label">Budget</div>
+                <!-- Build Summary -->
                 <div class="build-summary" id="build-summary">
                     <div class="summary-row">CPU: <span id="summary-cpu">—</span></div>
                     <div class="summary-row">GPU: <span id="summary-gpu">—</span></div>
@@ -98,6 +121,11 @@
             <div class="result-card performance-card">
                 <h3>Gaming Performance</h3>
                 <p class="result-value performance-value" id="performance-status">Waiting...</p>
+                <!-- Gaming Badge -->
+                <div class="gaming-badge" id="gaming-badge">
+                    <span class="badge-label">Badge</span>
+                    <span class="badge-value">—</span>
+                </div>
             </div>
 
             <!-- FPS Calculator Card -->
@@ -128,6 +156,62 @@
             </div>
             <div class="history-actions">
                 <button class="clear-history-button" id="clear-history-button">🗑️ Clear History</button>
+            </div>
+        </section>
+
+        <!-- COMPARISON SECTION -->
+        <section id="comparison" class="comparison-section">
+            <h2 class="section-title">Build Comparison</h2>
+            <div class="comparison-container">
+
+                <!-- Current Build Card -->
+                <div class="comparison-card current-build">
+                    <h3 class="comparison-card-title">Current Build</h3>
+                    <div class="comparison-list" id="current-build-list">
+                        <div class="comparison-item"><span class="ci-label">CPU</span><span class="ci-value" id="comp-current-cpu">—</span></div>
+                        <div class="comparison-item"><span class="ci-label">GPU</span><span class="ci-value" id="comp-current-gpu">—</span></div>
+                        <div class="comparison-item"><span class="ci-label">RAM</span><span class="ci-value" id="comp-current-ram">—</span></div>
+                        <div class="comparison-item"><span class="ci-label">SSD</span><span class="ci-value" id="comp-current-ssd">—</span></div>
+                        <div class="comparison-item"><span class="ci-label">PSU</span><span class="ci-value" id="comp-current-psu">—</span></div>
+                        <div class="comparison-item price-row"><span class="ci-label">Price</span><span class="ci-value price-val" id="comp-current-price">0$</span></div>
+                    </div>
+                </div>
+
+                <!-- Saved Build Card -->
+                <div class="comparison-card saved-build">
+                    <h3 class="comparison-card-title">Saved Build</h3>
+                    <div class="comparison-list" id="saved-build-list">
+                        <div class="comparison-item"><span class="ci-label">CPU</span><span class="ci-value" id="comp-saved-cpu">—</span></div>
+                        <div class="comparison-item"><span class="ci-label">GPU</span><span class="ci-value" id="comp-saved-gpu">—</span></div>
+                        <div class="comparison-item"><span class="ci-label">RAM</span><span class="ci-value" id="comp-saved-ram">—</span></div>
+                        <div class="comparison-item"><span class="ci-label">SSD</span><span class="ci-value" id="comp-saved-ssd">—</span></div>
+                        <div class="comparison-item"><span class="ci-label">PSU</span><span class="ci-value" id="comp-saved-psu">—</span></div>
+                        <div class="comparison-item price-row"><span class="ci-label">Price</span><span class="ci-value price-val" id="comp-saved-price">0$</span></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Comparison Buttons -->
+            <div class="comparison-actions">
+                <button class="compare-button" id="compare-button">⚖️ Compare Builds</button>
+                <button class="swap-button" id="swap-button">🔄 Swap Builds</button>
+            </div>
+
+            <!-- Comparison Result -->
+            <div class="comparison-result" id="comparison-result">
+                <div class="result-row">
+                    <span class="result-label">Price Difference</span>
+                    <span class="result-value-text" id="result-price">—</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Gaming Performance</span>
+                    <span class="result-value-text" id="result-performance">—</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Power Consumption</span>
+                    <span class="result-value-text" id="result-power">—</span>
+                </div>
             </div>
         </section>
     </main>
@@ -161,5 +245,5 @@
     <script src="data/components.js"></script>
     <script src="js/app.js"></script>
     <script src="js/history.js"></script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a123edbb8932ee49',t:'MTc4MjU1NzgyMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
